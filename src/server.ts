@@ -17,8 +17,8 @@ app.use('/api/auth', authRoutes);   // login: /api/auth/login
 app.use('/api/users', userRoutes);  // profile: /api/users/profile
 
 // Rotas
-app.use('/api', userRoutes);
-app.use('/api', authRoutes);
+app.use('/api/', userRoutes);
+app.use('/api/', authRoutes);
 
 app.get('/api/teste', (req, res) => {
   res.send('teste ok');

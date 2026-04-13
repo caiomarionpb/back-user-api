@@ -1,10 +1,29 @@
 import { Request, Response } from 'express';
 import connection from '../config/db';
+import { getUserProfileById } from '../services/user.service';
 
-export const getProfile = (req: Request, res: Response) => {
-  // req.user foi definido pelo middleware
-  const user = (req as any).user;
-  res.json({ user });
+const sendServiceError = (res: Response, error: unknown, defaultMessage: string) => {
+  if (error && typeof error === 'object' && 'status' in error) {
+    const { status, message } = error as { status: number; message: string };
+    return res.status(status).json({ error: message });
+  }
+
+  return res.status(500).json({ error: defaultMessage });
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  const userId = (req as any).user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Usuário não autenticado' });
+  }
+
+  try {
+    const profile = await getUserProfileById(userId);
+    return res.json(profile);
+  } catch (error) {
+    return sendServiceError(res, error, 'Erro ao buscar perfil');
+  }
 };
 
 export const getMe = (req: Request, res: Response) => {
