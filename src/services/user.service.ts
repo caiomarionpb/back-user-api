@@ -1,3 +1,13 @@
+// Confirma agendamento (status = 'confirmado')
+export const confirmBooking = async (bookingId: number, userId: number): Promise<void> => {
+  // Só permite confirmar se for do usuário e status = 'marcado'
+  const res = await executeQuery<any[]>(
+    'SELECT * FROM bookings WHERE id = ? AND user_id = ? AND status = "marcado"',
+    [bookingId, userId]
+  );
+  if (!res.length) throw { status: 404, message: 'Agendamento não encontrado ou já confirmado' };
+  await executeQuery('UPDATE bookings SET status = "confirmado" WHERE id = ?', [bookingId]);
+};
 import connection from '../config/db';
 
 type ServiceError = {

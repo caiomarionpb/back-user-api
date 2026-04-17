@@ -13,6 +13,10 @@ export const authMiddleware = (
 ): void => {
   const authHeader = req.headers.authorization;
 
+  // LOG: mostrar JWT_SECRET e token recebido
+  console.log('JWT_SECRET:', process.env.JWT_SECRET);
+  console.log('HEADER:', authHeader);
+
   // verifica se existe header
   if (!authHeader) {
     res.status(401).json({ error: 'Token não fornecido' });
@@ -51,7 +55,8 @@ export const authMiddleware = (
 
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Token inválido ou expirado' });
+    console.error('ERRO JWT:', error);
+    const errMsg = (error && (error as Error).message) ? (error as Error).message : 'Token inválido ou expirado';
+    res.status(401).json({ error: errMsg });
   }
-  console.log('HEADER:', req.headers.authorization);
 };

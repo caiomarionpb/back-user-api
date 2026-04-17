@@ -20,6 +20,7 @@ type ServiceError = {
 };
 
 const createToken = (payload: TokenPayload): string => {
+  console.log('PAYLOAD PARA TOKEN:', payload);
   return jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: '1d',
   });
