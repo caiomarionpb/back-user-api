@@ -1,3 +1,11 @@
+export const cancelBooking = async (bookingId: number, userId: number): Promise<void> => {
+  const res = await executeQuery<any[]>(
+    'SELECT * FROM bookings WHERE id = ? AND user_id = ? AND status IN ("marcado", "confirmado")',
+    [bookingId, userId]
+  );
+  if (!res.length) throw { status: 404, message: 'Agendamento não encontrado ou já cancelado' };
+  await executeQuery('UPDATE bookings SET status = "cancelado" WHERE id = ?', [bookingId]);
+};
 export const createBooking = async (
   userId: number,
   service: string,

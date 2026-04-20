@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { getProfile } from '../controllers/user.controller';
 import { updateProfile } from '../controllers/auth.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
-import { getUserBookingsController, confirmBookingController } from '../bookings/booking.controller';
+import { getUserBookingsController, confirmBookingController, cancelBookingController } from '../bookings/booking.controller';
 
 const router = Router();
 
@@ -13,6 +13,9 @@ router.put('/profile', authMiddleware, updateProfile);
 
 // Agendamentos
 router.get('/bookings', authMiddleware, getUserBookingsController);
+
+// Cancelar agendamento
+router.put('/bookings/:id/cancel', authMiddleware, cancelBookingController);
 router.put('/bookings/:id/confirm', authMiddleware, confirmBookingController);
 
 export default router; // ✅ precisa ser default

@@ -1,3 +1,17 @@
+import { cancelBooking } from './booking.service';
+export const cancelBookingController = async (req: Request, res: Response) => {
+  const userId = (req as any).user?.id;
+  const bookingId = Number(req.params.id);
+  if (!userId || !bookingId) {
+    return res.status(400).json({ error: 'Dados insuficientes' });
+  }
+  try {
+    await cancelBooking(bookingId, userId);
+    return res.json({ message: 'Agendamento cancelado!' });
+  } catch (error) {
+    return sendServiceError(res, error, 'Erro ao cancelar agendamento');
+  }
+};
 import { createBooking } from './booking.service';
 export const createBookingController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
