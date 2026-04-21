@@ -1,11 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+/**
+ * Interface do payload do token JWT.
+ */
 interface TokenPayload {
   id: number;
   email: string;
 }
 
+/**
+ * Middleware de autenticação JWT.
+ * Valida o token enviado no header Authorization e injeta o usuário no request.
+ */
 export const authMiddleware = (
   req: Request,
   res: Response,
@@ -17,40 +24,39 @@ export const authMiddleware = (
   console.log('JWT_SECRET:', process.env.JWT_SECRET);
   console.log('HEADER:', authHeader);
 
-  // verifica se existe header
+  // Verifica se existe header Authorization
   if (!authHeader) {
     res.status(401).json({ error: 'Token não fornecido' });
     return;
   }
 
-  // verifica formato: Bearer token
+  // Verifica formato: Bearer token
   const parts = authHeader.split(' ');
-
   if (parts.length !== 2) {
     res.status(401).json({ error: 'Token mal formatado' });
     return;
   }
 
   const [scheme, token] = parts;
-
   if (!/^Bearer$/i.test(scheme)) {
     res.status(401).json({ error: 'Token mal formatado' });
     return;
   }
 
   try {
+    // Valida o token JWT
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
     ) as TokenPayload;
 
-    // garante que tem id
+    // Garante que o token tem id
     if (!decoded.id) {
       res.status(401).json({ error: 'Token inválido' });
       return;
     }
 
-    // injeta no request
+    // Injeta o usuário no request
     (req as any).user = decoded;
 
     next();

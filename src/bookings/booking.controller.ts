@@ -1,4 +1,25 @@
-import { cancelBooking } from './booking.service';
+
+import { Request, Response } from 'express';
+import { cancelBooking, createBooking, getUserBookings, confirmBooking } from './booking.service';
+
+/**
+ * Envia resposta de erro padronizada para o cliente.
+ * @param res Response
+ * @param error Erro lançado
+ * @param defaultMessage Mensagem padrão caso não haja status customizado
+ */
+const sendServiceError = (res: Response, error: unknown, defaultMessage: string) => {
+  if (error && typeof error === 'object' && 'status' in error) {
+    const { status, message } = error as { status: number; message: string };
+    return res.status(status).json({ error: message });
+  }
+  return res.status(500).json({ error: defaultMessage });
+};
+
+/**
+ * Controller para cancelar um agendamento do usuário autenticado.
+ * Espera o id do agendamento na URL.
+ */
 export const cancelBookingController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   const bookingId = Number(req.params.id);
@@ -12,7 +33,11 @@ export const cancelBookingController = async (req: Request, res: Response) => {
     return sendServiceError(res, error, 'Erro ao cancelar agendamento');
   }
 };
-import { createBooking } from './booking.service';
+
+/**
+ * Controller para criar um novo agendamento para o usuário autenticado.
+ * Espera service, date, time e price no body.
+ */
 export const createBookingController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   const { service, date, time, price } = req.body;
@@ -26,17 +51,10 @@ export const createBookingController = async (req: Request, res: Response) => {
     return sendServiceError(res, error, 'Erro ao criar agendamento');
   }
 };
-import { Request, Response } from 'express';
-import { getUserBookings, confirmBooking } from './booking.service';
 
-const sendServiceError = (res: Response, error: unknown, defaultMessage: string) => {
-  if (error && typeof error === 'object' && 'status' in error) {
-    const { status, message } = error as { status: number; message: string };
-    return res.status(status).json({ error: message });
-  }
-  return res.status(500).json({ error: defaultMessage });
-};
-
+/**
+ * Controller para listar todos os agendamentos do usuário autenticado.
+ */
 export const getUserBookingsController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   console.log('[BOOKINGS CONTROLLER] chamada para user:', userId);
@@ -51,6 +69,10 @@ export const getUserBookingsController = async (req: Request, res: Response) => 
   }
 };
 
+/**
+ * Controller para confirmar um agendamento do usuário autenticado.
+ * Espera o id do agendamento na URL.
+ */
 export const confirmBookingController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   const bookingId = Number(req.params.id);

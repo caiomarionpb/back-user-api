@@ -1,3 +1,13 @@
+
+/**
+ * Rotas de usuário autenticado e gerenciamento de agendamentos do usuário.
+ * GET /profile: Retorna dados do perfil do usuário autenticado.
+ * PUT /profile: Atualiza dados do perfil do usuário autenticado.
+ * GET /bookings: Lista agendamentos do usuário autenticado.
+ * PUT /bookings/:id/cancel: Cancela um agendamento do usuário.
+ * PUT /bookings/:id/confirm: Confirma um agendamento do usuário.
+ */
+
 import { Router } from 'express';
 
 import { getProfile } from '../controllers/user.controller';
@@ -7,14 +17,14 @@ import { getUserBookingsController, confirmBookingController, cancelBookingContr
 
 const router = Router();
 
-// rotas protegidas
+// Rotas protegidas de perfil
 router.get('/profile', authMiddleware, getProfile);
 router.put('/profile', authMiddleware, updateProfile);
 
-// Agendamentos
+// Listagem de agendamentos do usuário
 router.get('/bookings', authMiddleware, getUserBookingsController);
 
-// Cancelar agendamento
+// Cancelamento e confirmação de agendamento
 router.put('/bookings/:id/cancel', authMiddleware, cancelBookingController);
 router.put('/bookings/:id/confirm', authMiddleware, confirmBookingController);
 

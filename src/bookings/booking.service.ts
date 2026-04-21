@@ -1,3 +1,9 @@
+
+/**
+ * Cancela um agendamento do usuário, se estiver marcado ou confirmado.
+ * @param bookingId ID do agendamento
+ * @param userId ID do usuário
+ */
 export const cancelBooking = async (bookingId: number, userId: number): Promise<void> => {
   const res = await executeQuery<any[]>(
     'SELECT * FROM bookings WHERE id = ? AND user_id = ? AND status IN ("marcado", "confirmado")',
@@ -6,6 +12,16 @@ export const cancelBooking = async (bookingId: number, userId: number): Promise<
   if (!res.length) throw { status: 404, message: 'Agendamento não encontrado ou já cancelado' };
   await executeQuery('UPDATE bookings SET status = "cancelado" WHERE id = ?', [bookingId]);
 };
+
+/**
+ * Cria um novo agendamento para o usuário, se não houver conflito de horário.
+ * @param userId ID do usuário
+ * @param service Nome do serviço
+ * @param date Data do agendamento
+ * @param time Horário do agendamento
+ * @param price Preço do serviço
+ * @returns Booking criado
+ */
 export const createBooking = async (
   userId: number,
   service: string,
@@ -31,6 +47,10 @@ export const createBooking = async (
 };
 import connection from '../config/db';
 
+
+/**
+ * Interface que representa um agendamento.
+ */
 export interface Booking {
   id: number;
   user_id: number;
@@ -42,6 +62,13 @@ export interface Booking {
   created_at: string;
 }
 
+
+/**
+ * Executa uma query SQL usando a conexão do banco de dados.
+ * @param query Query SQL
+ * @param params Parâmetros da query
+ * @returns Resultado tipado
+ */
 const executeQuery = <T>(query: string, params: any[] = []): Promise<T> => {
   return new Promise((resolve, reject) => {
     connection.query(query, params, (err, results) => {
@@ -53,6 +80,12 @@ const executeQuery = <T>(query: string, params: any[] = []): Promise<T> => {
   });
 };
 
+
+/**
+ * Busca todos os agendamentos do usuário autenticado, separando futuros e históricos.
+ * @param userId ID do usuário
+ * @returns Objetos future (futuros) e history (históricos)
+ */
 export const getUserBookings = async (userId: number): Promise<{ future: Booking[]; history: Booking[] }> => {
   const today = new Date().toISOString().split('T')[0];
   const future = await executeQuery<Booking[]>(
@@ -67,6 +100,12 @@ export const getUserBookings = async (userId: number): Promise<{ future: Booking
   return { future, history };
 };
 
+
+/**
+ * Confirma um agendamento do usuário, se estiver marcado.
+ * @param bookingId ID do agendamento
+ * @param userId ID do usuário
+ */
 export const confirmBooking = async (bookingId: number, userId: number): Promise<void> => {
   const res = await executeQuery<any[]>(
     'SELECT * FROM bookings WHERE id = ? AND user_id = ? AND status = "marcado"',

@@ -1,20 +1,17 @@
-// Confirma agendamento (status = 'confirmado')
-export const confirmBooking = async (bookingId: number, userId: number): Promise<void> => {
-  // Só permite confirmar se for do usuário e status = 'marcado'
-  const res = await executeQuery<any[]>(
-    'SELECT * FROM bookings WHERE id = ? AND user_id = ? AND status = "marcado"',
-    [bookingId, userId]
-  );
-  if (!res.length) throw { status: 404, message: 'Agendamento não encontrado ou já confirmado' };
-  await executeQuery('UPDATE bookings SET status = "confirmado" WHERE id = ?', [bookingId]);
-};
+
 import connection from '../config/db';
 
+/**
+ * Tipo para erros de serviço.
+ */
 type ServiceError = {
   status: number;
   message: string;
 };
 
+/**
+ * Interface que representa o perfil do usuário.
+ */
 export interface UserProfile {
   id: number;
   name: string;
@@ -23,6 +20,12 @@ export interface UserProfile {
   age: number;
 }
 
+/**
+ * Executa uma query SQL usando a conexão do banco de dados.
+ * @param query Query SQL
+ * @param params Parâmetros da query
+ * @returns Resultado tipado
+ */
 const executeQuery = <T>(query: string, params: any[] = []): Promise<T> => {
   return new Promise((resolve, reject) => {
     connection.query(query, params, (err, results) => {
@@ -34,16 +37,26 @@ const executeQuery = <T>(query: string, params: any[] = []): Promise<T> => {
   });
 };
 
+/**
+ * Busca o perfil do usuário pelo ID.
+ * @param userId ID do usuário
+ * @returns Perfil do usuário
+ */
 export const getUserProfileById = async (userId: number): Promise<UserProfile> => {
   const results = await executeQuery<any[]>('SELECT id, name, email, number, age FROM users WHERE id = ?', [userId]);
-
   if (results.length === 0) {
     throw { status: 404, message: 'Usuário não encontrado' } as ServiceError;
   }
-
   return results[0];
 };
 
+/**
+ * Atualiza os dados do perfil do usuário.
+ * @param userId ID do usuário
+ * @param name Novo nome
+ * @param number Novo telefone
+ * @param age Nova idade
+ */
 export const updateUserProfile = async (
   userId: number,
   name: string,
