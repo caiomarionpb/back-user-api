@@ -1,4 +1,3 @@
-
 /**
  * Arquivo principal do backend (server.ts)
  * Inicializa o servidor Express, configura middlewares, rotas e inicia o listener.
@@ -14,6 +13,7 @@ import './config/db';
 import userRoutes from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
 import bookingRoutes from './bookings/booking.routes';
+import barberRoutes from './barbers/barber.routes';
 
 dotenv.config();
 
@@ -28,6 +28,7 @@ app.use(express.urlencoded({ extended: true })); // Opcional: lê form-data
 app.use('/api/auth', authRoutes);      // Rotas de autenticação
 app.use('/api/users', userRoutes);    // Rotas de usuários
 app.use('/api/bookings', bookingRoutes); // Rotas de agendamentos
+app.use('/api/barbers', barberRoutes); // Rotas de barbeiros
 
 // Rota de teste simples
 app.get('/api/teste', (req, res) => {

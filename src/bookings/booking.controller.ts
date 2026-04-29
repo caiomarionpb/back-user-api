@@ -1,6 +1,5 @@
-
 import { Request, Response } from 'express';
-import { cancelBooking, createBooking, getUserBookings, confirmBooking } from './booking.service';
+import { cancelBooking, createBooking, getUserBookings, confirmBooking, getBarberBookingsForToday } from './booking.service';
 
 /**
  * Envia resposta de erro padronizada para o cliente.
@@ -40,12 +39,12 @@ export const cancelBookingController = async (req: Request, res: Response) => {
  */
 export const createBookingController = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
-  const { service, date, time, price } = req.body;
-  if (!userId || !service || !date || !time || !price) {
+  const { service, date, time, price, barberId } = req.body;
+  if (!userId || !service || !date || !time || !price || !barberId) {
     return res.status(400).json({ error: 'Dados insuficientes para agendar' });
   }
   try {
-    const booking = await createBooking(userId, service, date, time, price);
+    const booking = await createBooking(userId, service, date, time, price, barberId);
     return res.status(201).json(booking);
   } catch (error) {
     return sendServiceError(res, error, 'Erro ao criar agendamento');
@@ -66,6 +65,22 @@ export const getUserBookingsController = async (req: Request, res: Response) => 
     return res.json(bookings);
   } catch (error) {
     return sendServiceError(res, error, 'Erro ao buscar agendamentos');
+  }
+};
+
+/**
+ * Controller para o barbeiro buscar seus agendamentos do dia.
+ */
+export const getBarberBookingsController = async (req: Request, res: Response) => {
+  const barberId = (req as any).user?.id;
+  if (!barberId) {
+    return res.status(401).json({ error: 'Barbeiro não autenticado' });
+  }
+  try {
+    const bookings = await getBarberBookingsForToday(barberId);
+    return res.json(bookings);
+  } catch (error) {
+    return sendServiceError(res, error, 'Erro ao buscar agendamentos do barbeiro');
   }
 };
 

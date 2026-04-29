@@ -1,7 +1,6 @@
-
 // src/controllers/auth.controller.ts
 import { Request, Response } from 'express';
-import { loginUser, registerUser } from '../services/auth.service';
+import { loginUser, registerUser, loginBarber as loginBarberService } from '../services/auth.service';
 import { getUserProfileById, updateUserProfile } from '../services/user.service';
 
 /**
@@ -51,6 +50,24 @@ export const login = async (req: Request, res: Response) => {
     return res.json({ token });
   } catch (error) {
     return sendServiceError(res, error, 'Erro ao autenticar');
+  }
+};
+
+/**
+ * Controller para autenticação de barbeiro.
+ * Espera email e password no body.
+ * Retorna token JWT ao autenticar.
+ */
+export const loginBarber = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email e senha obrigatórios' });
+  }
+  try {
+    const token = await loginBarberService(email, password);
+    return res.json({ token });
+  } catch (error) {
+    return sendServiceError(res, error, 'Erro ao autenticar barbeiro');
   }
 };
 

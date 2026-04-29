@@ -1,4 +1,3 @@
-
 import jwt from 'jsonwebtoken';
 import connection from '../config/db';
 
@@ -88,4 +87,22 @@ export const loginUser = async (email: string, password: string): Promise<string
   }
   const user = results[0];
   return createToken({ id: user.id, email: user.email });
+};
+
+/**
+ * Realiza o login do barbeiro e retorna um token JWT.
+ * @param email Email do barbeiro
+ * @param password Senha do barbeiro
+ * @returns Token JWT
+ */
+export const loginBarber = async (email: string, password: string): Promise<string> => {
+  // Esta é uma implementação de exemplo. A tabela de barbeiros e a forma de autenticação
+  // podem variar dependendo de como o admin cadastra os barbeiros.
+  const results = await executeQuery<any[]>('SELECT * FROM barbers WHERE email = ? AND password = ?', [email, password]);
+  if (results.length === 0) {
+    throw { status: 404, message: 'Barbeiro ou senha incorretos' } as ServiceError;
+  }
+  const barber = results[0];
+  // O token do barbeiro pode conter informações diferentes, como 'barberId'
+  return createToken({ id: barber.id, email: barber.email });
 };

@@ -1,4 +1,3 @@
-
 /**
  * Rotas de autenticação e perfil do usuário.
  * POST /login: Realiza login do usuário.
@@ -8,7 +7,7 @@
  */
 
 import { Router } from 'express';
-import { login, register, getProfile, updateProfile } from '../controllers/auth.controller';
+import { login, register, getProfile, updateProfile, loginBarber } from '../controllers/auth.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -21,5 +20,8 @@ router.post('/register', register);
 router.get('/profile', authMiddleware, getProfile);
 // Atualiza perfil do usuário autenticado
 router.put('/profile', authMiddleware, updateProfile);
+
+// Login do barbeiro
+router.post('/barber/login', loginBarber);
 
 export default router;

@@ -1,4 +1,3 @@
-
 /**
  * Cancela um agendamento do usuário, se estiver marcado ou confirmado.
  * @param bookingId ID do agendamento
@@ -27,7 +26,8 @@ export const createBooking = async (
   service: string,
   date: string,
   time: string,
-  price: number
+  price: number,
+  barberId: number
 ): Promise<Booking> => {
   // Não permitir agendamento duplicado para o mesmo horário
   const exists = await executeQuery<any[]>(
@@ -36,8 +36,8 @@ export const createBooking = async (
   );
   if (exists.length) throw { status: 409, message: 'Já existe um agendamento para este horário' };
   const result: any = await executeQuery(
-    'INSERT INTO bookings (user_id, service, date, time, price, status) VALUES (?, ?, ?, ?, ?, "marcado")',
-    [userId, service, date, time, price]
+    'INSERT INTO bookings (user_id, service, date, time, price, barber_id, status) VALUES (?, ?, ?, ?, ?, ?, "marcado")',
+    [userId, service, date, time, price, barberId]
   );
   const [booking] = await executeQuery<Booking[]>(
     'SELECT * FROM bookings WHERE id = ?',
@@ -54,6 +54,7 @@ import connection from '../config/db';
 export interface Booking {
   id: number;
   user_id: number;
+  barber_id: number;
   service: string;
   date: string;
   time: string;
@@ -113,4 +114,18 @@ export const confirmBooking = async (bookingId: number, userId: number): Promise
   );
   if (!res.length) throw { status: 404, message: 'Agendamento não encontrado ou já confirmado' };
   await executeQuery('UPDATE bookings SET status = "confirmado" WHERE id = ?', [bookingId]);
+};
+
+/**
+ * Busca todos os agendamentos de um barbeiro para o dia atual.
+ * @param barberId ID do barbeiro
+ * @returns Lista de agendamentos
+ */
+export const getBarberBookingsForToday = async (barberId: number): Promise<Booking[]> => {
+  const today = new Date().toISOString().split('T')[0];
+  const bookings = await executeQuery<Booking[]>(
+    `SELECT b.*, u.name as user_name FROM bookings b JOIN users u ON b.user_id = u.id WHERE b.barber_id = ? AND b.date = ? AND b.status IN ('marcado', 'confirmado') ORDER BY b.time`,
+    [barberId, today]
+  );
+  return bookings;
 };
